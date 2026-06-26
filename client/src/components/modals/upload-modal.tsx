@@ -4,19 +4,19 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { api } from "@/lib/api";
 import { useContractStore } from "@/store/zustand";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { AnimatePresence, motion } from "framer-motion";
-import { FileText, Loader2, Sparkles, Trash } from "lucide-react";
+import { Brain, FileText, Loader2, Sparkles, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
+import router from "next/router";
 
 interface IUploadModalProps {
   isOpen: boolean;
@@ -29,7 +29,7 @@ export function UploadModal({
   onClosed,
   onUploadComplete,
 }: IUploadModalProps) {
-  const { setAnalysisResult } = useContractStore();
+  const { setAnalysisResults } = useContractStore();
 
   const [detectedType, setDetectedType] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +76,7 @@ export function UploadModal({
     }) => {
       const formData = new FormData();
       formData.append("contract", file);
+      formData.append("contractType", contractType);
 
       const response = await api.post("/contract/analyze", formData, {
         headers: {
@@ -87,7 +88,8 @@ export function UploadModal({
       return response.data;
     },
     onSuccess: (data) => {
-      setAnalysisResult(data);
+      setAnalysisResults(data);
+      setStep("done")
       onUploadComplete();
     },
   });
@@ -190,7 +192,7 @@ export function UploadModal({
       case "detecting": {
         return (
           <AnimatePresence>
-            <motion.div>
+            <motion.div className="flex flex-col items-center justify-center py-8">
               <Loader2 className="size-16 animate-spin text-primary" />
               <p className="mt-4 text-lg font-semibold ">
                 Detecting contract type...
@@ -227,7 +229,82 @@ export function UploadModal({
         );
       }
       case "processing": {
-        
+        return (
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="flex flex-col items-center justify-center py-8"
+            >
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 360],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <Brain className="size-20" />
+              </motion.div>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="mt-6 text-lg font-semibold text-gray-700"
+              >
+                AI is analyzing your contract...
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+                className="mt-2 text-sm text-gray-700"
+              >
+                This may take some time.
+              </motion.p>
+              <motion.div
+                className="w-64 h-2 bg-gray-200 rounded-full mt-6 overflow-hidden"
+                initial={{ width: 0 }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 10, ease: "linear" }}
+              >
+                <motion.div
+                  className="h-full bg-primary"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 10, ease: "linear" }}
+                />
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
+        );
+      }
+      case "done": {
+        return (
+          <AnimatePresence>
+            <motion.div>
+              <Alert className="mt-4">
+                <AlertTitle>Analysis completed</AlertTitle>
+                <AlertDescription>
+                  Your contract has been analyzed. you can now view the results
+                </AlertDescription>
+              </Alert>
+
+              <motion.div className="mt-6 flex flex-col space-y-3 relative">
+                <Button onClick={() => router.push(`/dashboard/results`)}>
+                  View results
+                </Button>
+                <Button variant={"outline"} onClick={handleClose}>
+                  Close
+                </Button>
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
+        );
       }
     }
   };

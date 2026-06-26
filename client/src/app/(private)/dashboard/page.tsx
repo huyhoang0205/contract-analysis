@@ -14,7 +14,7 @@ export default function Dashboard() {
       <UploadModal
         isOpen={isUploadModalOpen}
         onClosed={() => setIsUploadModalOpen(false)}
-        onUploadComplete={() => setIsUploadModalOpen(false)}
+        onUploadComplete={() => setIsUploadModalOpen(true)}
       />
     </div>
   );

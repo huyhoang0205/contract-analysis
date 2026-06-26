@@ -2,6 +2,7 @@ import type { NextFunction, Request, RequestHandler, Response } from "express";
 import multer from "multer";
 import type { IUser } from "../model/user.model";
 import { redis } from "../config/redis";
+import type { FallbackAnalysis } from "../services/ai.service";
 import {
   detectContractType,
   extractTextFromPDF,
@@ -75,11 +76,14 @@ export const analyzeContract = async (
 
     const pdfText = await extractTextFromPDF(fileKey);
 
-    let analysis: Partial<IContractAnalysis>;
+    let analysis: FallbackAnalysis | string;
 
     analysis = await analyzeContractWithAI(pdfText, contractType);
 
-    if (!analysis.summary || !analysis.risks || !analysis.opportunities) {
+    if (
+      typeof analysis === "object" &&
+      (!analysis.summary || !analysis.risks || !analysis.opportunities)
+    ) {
       throw new Error("Failed to analyze contract");
     }
 
@@ -87,7 +91,7 @@ export const analyzeContract = async (
       userId: user._id,
       contractText: pdfText,
       contractType,
-      ...analysis,
+      ...(analysis as Partial<IContractAnalysis>),
       language: "vie",
       aiModel: AI_MODEL,
     });

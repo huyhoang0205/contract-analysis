@@ -1,5 +1,3 @@
-À, tôi hiểu ý bạn rồi! Bạn muốn có một "bộ quy tắc" rõ ràng để biết chính xác **khi nào mở một file `.tsx` lên là phải gõ ngay `"use client"**` để ứng dụng chạy mượt mà và không bị quăng lỗi (như lỗi tuyển tập *"useState is not a function"* kinh điển).
-
 Để ứng dụng hoạt động tốt nhất và không bị lỗi, bạn hãy áp dụng quy tắc **"Cần gì thì khai nấy"** dựa trên 3 nhóm trường hợp bắt buộc sau đây:
 
 ---

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { UserButton } from "./shared/user-button";
 
 const navItem: { name: string; href: string }[] = [
-  { name: "Dashboard", href: "/" },
+  { name: "Dashboard", href: "/dashboard" },
   { name: "Pricing", href: "/pricing" },
   { name: "Privacy Policy", href: "/privacy" },
 ];

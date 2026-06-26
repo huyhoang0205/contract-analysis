@@ -2,7 +2,7 @@ import { redis } from "../config/redis";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { GoogleGenAI } from "@google/genai";
 
-export const AI_MODEL = "gemini-3.5-flash";
+export const AI_MODEL = "gemini-2.5-flash";
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_SECRET! });
 
 export const extractTextFromPDF = async (fileKey: string) => {
@@ -49,11 +49,11 @@ export const detectContractType = async (
   contractText: string,
 ): Promise<string> => {
   const prompt = `
-    Analyze the following contract text and determine the type of contract it is.
-    Provide only the contract type as a single string (e.g., "Employment", "Non-Disclosure Agreement", "Sales", "Lease", etc.).
-    Do not include any additional explanation or text.
+    Hãy phân tích đoạn văn bản hợp đồng sau đây và xác định loại hợp đồng.
+    Chỉ cung cấp loại hợp đồng dưới dạng một chuỗi văn bản duy nhất (ví dụ: "Lao động", "Thỏa thuận bảo mật thông tin", "Mua bán", "Thuê nhà", v.v.).
+    Không bao gồm bất kỳ lời giải thích hoặc văn bản bổ sung nào.
 
-    Contract text:
+    Văn bản hợp đồng:
     ${contractText.substring(0, 2000)}`;
 
   const results = await genAI.models.generateContent({
@@ -68,27 +68,42 @@ export const detectContractType = async (
   return response;
 };
 
+export interface IRisk {
+  risk: string;
+  explanation: string;
+}
+
+export interface IOpportunity {
+  opportunity: string;
+  explanation: string;
+}
+
+export interface FallbackAnalysis {
+  risks: IRisk[];
+  opportunities: IOpportunity[];
+  summary: string;
+}
+
 export const analyzeContractWithAI = async (
   contractText: string,
   contractType: string,
 ) => {
   let prompt = `
-    Analyze the following ${contractType} contract and provide:
-    1. A list of at least 10 potential risks for the party receiving the contract, each with a brief explanation and severity level (low, medium, high).
-    2. A list of at least 10 potential opportunities or benefits for the receiving party, each with a brief explanation and impact level (low, medium, high).
-    3. A comprehensive summary of the contract, including key terms and conditions.
-    4. Any recommendations for improving the contract from the receiving party's perspective.
-    5. A list of key clauses in the contract.
-    6. An assessment of the contract's legal compliance.
-    7. A list of potential negotiation points.
-    8. The contract duration or term, if applicable.
-    9. A summary of termination conditions, if applicable.
-    10. A breakdown of any financial terms or compensation structure, if applicable.
-    11. Any performance metrics or KPIs mentioned, if applicable.
-    12. A summary of any specific clauses relevant to this type of contract (e.g., intellectual property for employment contracts, warranties for sales contracts).
-    13. An overall score from 1 to 100, with 100 being the highest. This score represents the overall favorability of the contract based on the identified risks and opportunities.
-
-    Format your response as a JSON object with the following structure:
+    Hãy phân tích hợp đồng ${contractType} sau đây và cung cấp:
+    1. Danh sách ít nhất 10 rủi ro tiềm ẩn đối với bên nhận hợp đồng (người lao động), mỗi rủi ro kèm theo giải thích ngắn gọn và mức độ nghiêm trọng (thấp, trung bình, cao).
+    2. Danh sách ít nhất 10 cơ hội hoặc lợi ích tiềm ẩn cho bên nhận hợp đồng, mỗi cơ hội kèm theo giải thích ngắn gọn và mức độ tác động (thấp, trung bình, cao).
+    3. Bản tóm tắt toàn diện về hợp đồng, bao gồm các điều khoản và điều kiện chính.
+    4. Bất kỳ kiến nghị nào nhằm cải thiện hợp đồng dưới góc nhìn của bên nhận hợp đồng.
+    5. Danh sách các điều khoản chính trong hợp đồng.
+    6. Đánh giá về tính tuân thủ pháp lý của hợp đồng.
+    7. Danh sách các điểm tiềm ẩn có thể thương lượng.
+    8. Thời hạn hoặc thời gian của hợp đồng, nếu có.
+    9. Tóm tắt các điều kiện chấm dứt hợp đồng, nếu có.
+    10. Bảng phân rã các điều khoản tài chính hoặc cấu trúc tiền lương/bồi thường, nếu có.
+    11. Bất kỳ chỉ số hiệu suất hoặc KPI nào được đề cập, nếu có.
+    12. Tóm tắt các điều khoản cụ thể liên quan đến loại hợp đồng này (ví dụ: sở hữu trí tuệ đối với hợp đồng lao động, bảo hành đối với hợp đồng mua bán).
+    13. Điểm số tổng thể từ 1 đến 100, với 100 là cao nhất. Điểm số này đại diện cho mức độ thuận lợi tổng thể của hợp đồng dựa trên các rủi ro và cơ hội đã xác định.
+    14. Định dạng phản hồi của bạn dưới dạng một đối tượng JSON với cấu trúc như sau:
     {
       "risks": [{"risk": "Risk description", "explanation": "Brief explanation", "severity": "low|medium|high"}],
       "opportunities": [{"opportunity": "Opportunity description", "explanation": "Brief explanation", "impact": "low|medium|high"}],
@@ -116,12 +131,85 @@ export const analyzeContractWithAI = async (
     ${contractText}
     `;
 
-    const results = await genAI.models.generateContent({
-      model: AI_MODEL,
-      contents: prompt,
+  const results = await genAI.models.generateContent({
+    model: AI_MODEL,
+    contents: prompt,
+  });
+
+  let text = results.text
+    ? results.text.trim()
+    : "Something with wrong with response of genAI";
+
+  console.log("analyze contract with ai:::", text);
+  // remove any markdown formatting
+  text = text.replace(/```json\n?|\n?```/g, "").trim();
+
+  try {
+    // Attempt to fix common JSON error
+    text = text.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3'); // Ensure all keys are quoted
+    text = text.replace(/:\s*"([^"]*)"([^,}\]])/g, ': "$1"$2'); // Ensure all string values are properly quoted
+    text = text.replace(/,\s*}/g, "}"); // Remove trailing commas
+
+    const analysis = JSON.stringify(text);
+    return analysis;
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+  }
+
+  const fallbackAnalysis: FallbackAnalysis = {
+    risks: [],
+    opportunities: [],
+    summary: "Error analyzing contract",
+  };
+
+  // Extract risk
+  const ricksMatch = text.match(/"risks"\s*:\s*\[([\s\S]*?)\]/);
+  if (ricksMatch && ricksMatch[1]) {
+    const ricksBlock = ricksMatch[1]?.split("},").filter(Boolean);
+    fallbackAnalysis.risks = ricksBlock.map((risk) => {
+      const riskMatch = risk.match(/"risk"\s*:\s*"([^"]*)"/);
+      const explanationMatch = risk.match(/"explanation"\s*:\s*"([^"]*)"/);
+      return {
+        risk: riskMatch && riskMatch[1] ? riskMatch[1] : "Unknown",
+        explanation:
+          explanationMatch && explanationMatch[1]
+            ? explanationMatch[1]
+            : "Unknown",
+      };
     });
+  }
 
-    const response = results.text? results.text.trim() : "Something with wrong with response of genAI";
+  //Extact opportunities
+  const opportunitiesMatch = text.match(/"opportunities"\s*:\s*\[([\s\S]*?)\]/);
+  if (opportunitiesMatch && opportunitiesMatch[1]) {
+    const opportunitiesBlock = opportunitiesMatch[1]
+      ?.split("},")
+      .filter(Boolean);
+    fallbackAnalysis.opportunities = opportunitiesBlock.map((opportunity) => {
+      const opportunityMatch = opportunity.match(
+        /"opportunity"\s*:\s*"([^"]*)"/,
+      );
+      const explanationMatch = opportunity.match(
+        /"explanation"\s*:\s*"([^"]*)"/,
+      );
+      return {
+        opportunity:
+          opportunityMatch && opportunityMatch[1]
+            ? opportunityMatch[1]
+            : "Unknown",
+        explanation:
+          explanationMatch && explanationMatch[1]
+            ? explanationMatch[1]
+            : "Unknown",
+      };
+    });
+  }
 
-    return response;
+  // Extract summary
+  const summaryMatch = text.match(/"summary"\s*:\s*"([^"]*)"/);
+  if (summaryMatch && summaryMatch[1]) {
+    fallbackAnalysis.summary = summaryMatch[1];
+  }
+
+  return fallbackAnalysis;
 };
