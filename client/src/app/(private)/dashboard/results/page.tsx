@@ -5,11 +5,14 @@ import { ContractAnalysis } from "@/interfaces/contract.interface";
 import { useContractStore } from "@/store/zustand";
 
 export default function ContractResultsPage() {
-  const analysisResults = useContractStore((state) => state.analysisResults);
+  const analysisResults = useContractStore(
+    (state) => state.analysisResults,
+  ) as ContractAnalysis;
   return (
     <ContractAnalysisResults
-      contractId={analysisResults?._id}
-      analysisResults={analysisResults as ContractAnalysis}
+      contractId={ true? "test" : analysisResults?._id}
+      isActive={true}
+      analysisResults={analysisResults}
     />
   );
 }
