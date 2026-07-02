@@ -16,7 +16,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Brain, FileText, Loader2, Sparkles, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 interface IUploadModalProps {
   isOpen: boolean;
@@ -29,6 +29,7 @@ export function UploadModal({
   onClosed,
   onUploadComplete,
 }: IUploadModalProps) {
+  const router = useRouter();
   const { setAnalysisResults } = useContractStore();
 
   const [detectedType, setDetectedType] = useState<string | null>(null);
@@ -89,7 +90,7 @@ export function UploadModal({
     },
     onSuccess: (data) => {
       setAnalysisResults(data);
-      setStep("done")
+      setStep("done");
       onUploadComplete();
     },
   });

@@ -3,6 +3,8 @@ import {
   detectAndConfirmContractType,
   analyzeContract,
   uploadMiddleware,
+  getUserContracts,
+  getContractByID,
 } from "../controller/contract.controller";
 import { isAuthenticated } from "../middlewares/auth";
 import { handleErrors } from "../middlewares/error";
@@ -23,7 +25,7 @@ router.post(
   handleErrors(analyzeContract),
 );
 
-// router.get("/user-contracts", isAuthenticated, handleErrors(getUserContracts));
-// router.get("/contract/:id", isAuthenticated, handleErrors(getContractByID));
+router.get("/user-contracts", isAuthenticated, handleErrors(getUserContracts));
+router.get("/contract/:id", isAuthenticated, handleErrors(getContractByID));
 
 export default router;

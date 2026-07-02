@@ -11,6 +11,9 @@ import {
 } from "../services/ai.service";
 import type { IContractAnalysis } from "../model/contract.model";
 import ContractAnalysis from "../model/contract.model";
+import mongoose from "mongoose";
+import ContractAnalysisSchema from "../model/contract.model";
+import { isValidMongoId } from "../utils/mongo.utils";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -76,14 +79,11 @@ export const analyzeContract = async (
 
     const pdfText = await extractTextFromPDF(fileKey);
 
-    let analysis: FallbackAnalysis | string;
+    let analysis: FallbackAnalysis | any;
 
     analysis = await analyzeContractWithAI(pdfText, contractType);
 
-    if (
-      typeof analysis === "object" &&
-      (!analysis.summary || !analysis.risks || !analysis.opportunities)
-    ) {
+    if (!analysis.summary || !analysis.risks || !analysis.opportunities) {
       throw new Error("Failed to analyze contract");
     }
 
@@ -91,14 +91,69 @@ export const analyzeContract = async (
       userId: user._id,
       contractText: pdfText,
       contractType,
+      summary: analysis.summary,
       ...(analysis as Partial<IContractAnalysis>),
       language: "vie",
       aiModel: AI_MODEL,
     });
 
+    console.log("savedAnalysis:::", savedAnalysis);
+
     res.json(savedAnalysis);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to analyze contract" });
+  }
+};
+export const getUserContracts = async (req: Request, res: Response) => {
+  const user = req.user as IUser;
+
+  try {
+    interface QueryType {
+      userId: mongoose.Types.ObjectId;
+    }
+
+    const query: QueryType = { userId: user._id as mongoose.Types.ObjectId };
+    const contracts = await ContractAnalysisSchema.find(query).sort({
+      createdAt: -1,
+    });
+
+    res.json(contracts);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Failed to get contracts" });
+  }
+};
+
+export const getContractByID = async (req: Request, res: Response) => {
+  const { id } = req.params as {id: string};
+  const user = req.user as IUser;
+
+  if (!isValidMongoId(id)) {
+    return res.status(400).json({ error: "Invalid contract ID" });
+  }
+
+  try {
+    const cachedContracts = await redis.get(`contract:${id}`);
+    if (cachedContracts) {
+      return res.json(cachedContracts);
+    }
+
+    //if not in cache, get from db
+    const contract = await ContractAnalysisSchema.findOne({
+      _id: id,
+      userId: user._id,
+    });
+
+    if (!contract) {
+      return res.status(404).json({ error: "Contract not found! " });
+    }
+    //Cache the result for future request
+    await redis.set(`contract:${id}`, contract, { ex: 3600 });
+
+    res.json(contract);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to get contract" });
   }
 };

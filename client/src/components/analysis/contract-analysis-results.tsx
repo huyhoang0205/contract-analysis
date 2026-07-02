@@ -1,5 +1,5 @@
 import { ContractAnalysis } from "@/interfaces/contract.interface";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 import {
   Card,
@@ -10,10 +10,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import OverallScoreChart from "./chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface IContractAnalysisResultsProps {
   analysisResults: ContractAnalysis;
@@ -28,8 +37,12 @@ export default function ContractAnalysisResults({
 }: IContractAnalysisResultsProps) {
   const [activeTab, setActiveTab] = useState("summary");
 
+  if(!analysisResults) {
+    return <div>No results!</div>
+  }
+
   const getScore = () => {
-    const score = analysisResults?.overallScore || 54;
+    const score = analysisResults.overallScore;
     if (score > 70)
       return { icon: ArrowUp, color: "text-green-500", text: "Good" };
     if (score < 50)
@@ -38,6 +51,28 @@ export default function ContractAnalysisResults({
   };
 
   const scoreTrend = getScore();
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case "high":
+        return "bg-red-100 text-red-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "low":
+        return "bg-green-100 text-green-800";
+    }
+  };
+
+  const getImpactColor = (impact: string) => {
+    switch (impact) {
+      case "high":
+        return "bg-red-100 text-red-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "low":
+        return "bg-green-100 text-green-800";
+    }
+  };
 
   const renderRisksAndOpportunities = (
     items: Array<{
@@ -52,26 +87,78 @@ export default function ContractAnalysisResults({
     const displayItems = isActive ? items : items.slice(0, 3);
     const fakeItems = {
       risk: type === "risks" ? "Hidden Risk1" : undefined,
-      opportunities: type === "risks" ? "Hidden Opportunity1" : undefined,
+      opportunities:
+        type === "opportunities" ? "Hidden Opportunity1" : undefined,
       explanation: "Hidden Explanation1",
       severity: "low",
       impact: "low",
     };
 
     return (
-      <ul>
+      <ul className="space-y-4">
         {displayItems.map((item, index) => (
-          <motion.li key={index}>
+          <motion.li
+            key={index}
+            className="border rounder-lg p-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+          >
             <div className="flex justify-between items-start mb-2">
               <span className="font-semibold text-lg">
-                {
-                  type === "risks"? item.risks : item.opportunities
-                }
+                {type === "risks" ? item.risks : item.opportunities}
               </span>
+              {(item.severity || item.impact) && (
+                <Badge
+                  className={
+                    type === "risks"
+                      ? getSeverityColor(item.severity!)
+                      : getImpactColor(item.impact!)
+                  }
+                >
+                  {(item.severity || item.impact)?.toUpperCase()}
+                </Badge>
+              )}
             </div>
+            <p className="mt-2 text-gray-600">
+              {type === "risks" ? item.explanation : item.explanation}
+            </p>
           </motion.li>
         ))}
+
+        {!isActive && items.length > 3 && (
+          <motion.li
+            className="border rounder-lg p-4 blur-sm"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: displayItems.length * 0.1 }}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <span className="font-semibold text-lg">
+                {type === "risks" ? fakeItems.risk : fakeItems.opportunities}
+              </span>
+              <Badge>
+                {(fakeItems.severity || fakeItems.impact)?.toUpperCase()}
+              </Badge>
+            </div>
+          </motion.li>
+        )}
       </ul>
+    );
+  };
+
+  const renderPremiumAccordion = (content: ReactNode) => {
+    if (isActive) {
+      return content;
+    }
+
+    return (
+      <div className="relative">
+        <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-50 flex items-center justify-between">
+          <Button variant="outline">Upgrade to Premium</Button>
+          <div className="opacity-50">{content}</div>
+        </div>
+      </div>
     );
   };
 
@@ -93,7 +180,7 @@ export default function ContractAnalysisResults({
             <div className="w-1/2">
               <div className="flex items-center space-x-4 mb-4">
                 <div className="text-4xl font-bold">
-                  {analysisResults?.overallScore ?? 54}
+                  {analysisResults.overallScore ?? 0}
                 </div>
                 <div className={`flex items-center ${scoreTrend.color}`}>
                   <scoreTrend.icon className="size-6 mr-1" />
@@ -103,12 +190,12 @@ export default function ContractAnalysisResults({
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Risk</span>
-                  <span>34%</span>
+                  <span>{100 - analysisResults.overallScore}%</span>
                 </div>
 
                 <div className="flex justify-between text-sm">
                   <span>Opportunities</span>
-                  <span>34%</span>
+                  <span>{analysisResults.overallScore}%</span>
                 </div>
                 <p className="text-sm text-gray-600 mt-4">
                   This score represents the overall risk and opportunities
@@ -119,7 +206,7 @@ export default function ContractAnalysisResults({
             <div className="w-1/2">
               <div className="w-full h-full max-w-xs overflow-hidden">
                 <OverallScoreChart
-                  overallScore={analysisResults?.overallScore ?? 73}
+                  overallScore={analysisResults.overallScore}
                 />
               </div>
             </div>
@@ -141,8 +228,7 @@ export default function ContractAnalysisResults({
             </CardHeader>
             <CardContent>
               <p className="text-lg leading-relaxed">
-                This is a summary of the contract.
-                {/* {analysisResults.summary} */}
+                {analysisResults.summary}
               </p>
             </CardContent>
           </Card>
@@ -150,36 +236,133 @@ export default function ContractAnalysisResults({
         <TabsContent value="risks">
           <Card>
             <CardHeader>
-              <CardTitle>Risks</CardTitle>
+              <CardTitle className="font-bold text-3xl">Risks</CardTitle>
             </CardHeader>
             <CardContent>
-              {renderRisksAndOpportunities(
-                [
-                  {
-                    risks: "Hidden Risk1",
-                    explanation: "Hidden Explanation1",
-                    severity: "low",
-                    impact: "low",
-                  },
-                  {
-                    risks: "Hidden Risk2",
-                    explanation: "Hidden Explanation2",
-                    severity: "low",
-                    impact: "low",
-                  },
-                  {
-                    risks: "Hidden Risk3",
-                    explanation: "Hidden Explanation3",
-                    severity: "low",
-                    impact: "low",
-                  },
-                ],
-                "risks",
+              {renderRisksAndOpportunities(analysisResults.risks, "risks")}
+
+              {!isActive && (
+                <p className="mt-4 text-center text-sm text-gray-500">
+                  Upgrade to Premium to see all risks
+                </p>
               )}
             </CardContent>
           </Card>
         </TabsContent>
+        <TabsContent value="opportunities">
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-bold text-3xl">
+                Opportunities
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {renderRisksAndOpportunities(
+                analysisResults.opportunities,
+                "opportunities",
+              )}
+              {!isActive && (
+                <p className="mt-4 text-center text-sm text-gray-500">
+                  Upgrade to Premium to see all opportunities
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="details">
+          {isActive ? (
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contract Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {analysisResults.keyClauses.map((keyClause, index) => (
+                      <motion.li className="flex items-center" key={index}>
+                        {keyClause}
+                      </motion.li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recommendations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {analysisResults.recommendations.map(
+                      (recommendation, index) => (
+                        <motion.li key={index} className="flex items-center">
+                          {recommendation}
+                        </motion.li>
+                      ),
+                    )}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Contract Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>
+                  Upgrade to Premium to see contract detailed analysis,
+                  including key clauses and recommendations
+                </p>
+                <Button className="mt-4">Upgrade to Premium</Button>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
       </Tabs>
+
+      <Accordion type="single" collapsible className="mb-6">
+        {renderPremiumAccordion(
+          <>
+            <AccordionItem value="contract-details">
+              <AccordionTrigger>Contract Details</AccordionTrigger>
+              <AccordionContent>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-semibold mb-2">
+                      Duration and Termination
+                    </h3>
+                    <p>{analysisResults.contractDuration}</p>
+                    <strong>Termination Conditions</strong>
+                    <p>{analysisResults.terminationConditions}</p>
+                  </div>
+                  <div className="">
+                    <h3 className="font-semibold mb-2">Legal Infomation</h3>
+                    <p>
+                      <strong>Legal Compliance</strong>
+                      {analysisResults.legalCompliance}
+                    </p>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </>,
+        )}
+      </Accordion>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Negotiation Points</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="grid md:grid-cols-2 gap-2">
+            {analysisResults.negotiationPoints?.map((point, index) => (
+              <li className="flex items-center" key={index}>
+                {point}
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }

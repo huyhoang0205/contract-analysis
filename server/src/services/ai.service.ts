@@ -1,9 +1,12 @@
 import { redis } from "../config/redis";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
-import { GoogleGenAI } from "@google/genai";
+// import { GoogleGenAI } from "@google/genai";
+import OpenAI from "openai";
 
 export const AI_MODEL = "gemini-2.5-flash";
-const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_SECRET! });
+// const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_SECRET! });
+
+const client = new OpenAI({baseURL: 'https://aiapiv2.pekpik.com/v1', apiKey: process.env.GEMINI_API_SECRET! });
 
 export const extractTextFromPDF = async (fileKey: string) => {
   try {
@@ -56,13 +59,23 @@ export const detectContractType = async (
     Văn bản hợp đồng:
     ${contractText.substring(0, 2000)}`;
 
-  const results = await genAI.models.generateContent({
-    model: AI_MODEL,
-    contents: prompt,
+  // const results = await genAI.models.generateContent({
+  //   model: AI_MODEL,
+  //   contents: prompt,
+  // });
+  // const response = results.text
+  //   ? results.text.trim()
+  //   : "Something with wrong with response of genAI";
+
+  const results = await client.responses.create({
+    model: "deepseek-chat",
+    input: prompt,
   });
 
-  const response = results.text
-    ? results.text.trim()
+  console.log(results);
+
+  const response = results
+    ? results.output_text.trim()
     : "Something with wrong with response of genAI";
 
   return response;
@@ -131,14 +144,24 @@ export const analyzeContractWithAI = async (
     ${contractText}
     `;
 
-  const results = await genAI.models.generateContent({
-    model: AI_MODEL,
-    contents: prompt,
+  // const results = await genAI.models.generateContent({
+  //   model: AI_MODEL,
+  //   contents: prompt,
+  // });
+
+  const results = await client.responses.create({
+    model: "deepseek-chat",
+    input: prompt,
   });
 
-  let text = results.text
-    ? results.text.trim()
-    : "Something with wrong with response of genAI";
+  // let text = results.text
+  //   ? results.text.trim()
+  //   : "Something with wrong with response of genAI";
+
+    let text = results.output_text
+      ? results.output_text.trim()
+      : "Something with wrong with response of genAI";
+
 
   console.log("analyze contract with ai:::", text);
   // remove any markdown formatting
@@ -150,7 +173,7 @@ export const analyzeContractWithAI = async (
     text = text.replace(/:\s*"([^"]*)"([^,}\]])/g, ': "$1"$2'); // Ensure all string values are properly quoted
     text = text.replace(/,\s*}/g, "}"); // Remove trailing commas
 
-    const analysis = JSON.stringify(text);
+    const analysis = JSON.parse(text);
     return analysis;
   } catch (error) {
     console.error("Error parsing JSON:", error);
