@@ -10,4 +10,22 @@ const useContractStore = create<ContractStore>((set) => ({
   setAnalysisResults: (result) => set({ analysisResults: result }),
 }));
 
-export { useContractStore };
+type ModalState = {
+  modals: Record<string, boolean>;
+  openModals: (key: string) => void;
+  closeModals: (key: string) => void;
+  isOpen: (key: string) => boolean;
+};
+
+const useModalStore = create<ModalState>((set, get) => ({
+  modals: {},
+  openModals: (key: string) => {
+    set((state) => ({ modals: { ...state.modals, [key]: true } }));
+  },
+  closeModals: (key: string) => {
+    set((state) => ({ modals: { ...state.modals, [key]: false } }));
+  },
+  isOpen: (key: string) => Boolean(get().modals[key]),
+}));
+
+export { useContractStore, useModalStore };

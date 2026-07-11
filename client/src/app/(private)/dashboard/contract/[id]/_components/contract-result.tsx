@@ -23,12 +23,9 @@ export default function ContractResults({ contractId }: IContractResultsProps) {
     let ignore = false;
     const fetchAnalysisResults = async (id: string) => {
       try {
-        setLoading(true);
-        setError(false);
-        setAnalysisResults(null);
         const response = await api.get(`/contract/contract/${id}`);
-        console.log(response.data);
         if (!ignore) {
+          console.log(response.data);
           setAnalysisResults(response.data);
           setError(false);
         }
@@ -44,21 +41,24 @@ export default function ContractResults({ contractId }: IContractResultsProps) {
     return () => {
       ignore = true;
     };
-  }, [user]);
+  }, [user, contractId]);
+
+  if (analysisResutls && Object.keys(analysisResutls).length > 0) {
+    return (
+      <ContractAnalysisResults
+        contractId={contractId}
+        analysisResults={analysisResutls}
+        isActive={true}
+      />
+    );
+  }
 
   if (loading) {
     return <div>Đang tải kết quả phân tích...</div>;
   }
 
-  if (error || !analysisResutls) {
+  if (error) {
+    console.log("error", error);
     return notFound();
   }
-
-  return (
-    <ContractAnalysisResults
-      contractId={contractId}
-      analysisResults={analysisResutls}
-      isActive={true}
-    />
-  );
 }

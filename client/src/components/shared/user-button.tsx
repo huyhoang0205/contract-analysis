@@ -15,15 +15,11 @@ import Link from "next/link";
 import { Icons } from "@/components/shared/icon";
 import { logout } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { useModalStore } from "@/store/zustand";
 export function UserButton() {
   const { user } = useCurrentUser();
+  const { openModals } = useModalStore();
   const router = useRouter();
-  function googleSignIn(): Promise<void> {
-    return new Promise((resolve) => {
-      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
-      resolve();
-    });
-  }
 
   const handleLogout = async () => {
     await logout();
@@ -75,7 +71,9 @@ export function UserButton() {
         </>
       ) : (
         <>
-          <Button onClick={googleSignIn}>Sign in</Button>
+          <Button onClick={() => openModals("connectAccountModal")}>
+            Sign in
+          </Button>
         </>
       )}
     </div>
