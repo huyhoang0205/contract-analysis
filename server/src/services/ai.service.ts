@@ -6,7 +6,10 @@ import OpenAI from "openai";
 export const AI_MODEL = "gemini-2.5-flash";
 // const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_SECRET! });
 
-const client = new OpenAI({baseURL: 'https://aiapiv2.pekpik.com/v1', apiKey: process.env.GEMINI_API_SECRET! });
+const client = new OpenAI({
+  baseURL: "https://aiapiv2.pekpik.com/v1",
+  apiKey: process.env.OPEN_AI_SECRET!,
+});
 
 export const extractTextFromPDF = async (fileKey: string) => {
   try {
@@ -158,10 +161,9 @@ export const analyzeContractWithAI = async (
   //   ? results.text.trim()
   //   : "Something with wrong with response of genAI";
 
-    let text = results.output_text
-      ? results.output_text.trim()
-      : "Something with wrong with response of genAI";
-
+  let text = results.output_text
+    ? results.output_text.trim()
+    : "Something with wrong with response of genAI";
 
   console.log("analyze contract with ai:::", text);
   // remove any markdown formatting

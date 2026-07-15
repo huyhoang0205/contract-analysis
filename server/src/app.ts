@@ -13,6 +13,9 @@ import MongoStore from "connect-mongo";
 // import routes
 import authRoute from "./routes/auth";
 import contractRoute from "./routes/contract";
+import paymentRoute from "./routes/payment";
+
+import { handleWebhook } from "./controller/payment.controller";
 
 const app = express();
 
@@ -22,12 +25,21 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.log("Error connecting to MongoDB", err));
 
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  }),
+);
 app.use(helmet());
 app.use(morgan("dev"));
+
+app.post(
+  "/payment/webhook",
+  express.raw({ type: "application/json" }),
+  handleWebhook,
+);
+
 app.use(express.json());
 
 app.use(
@@ -49,6 +61,7 @@ app.use(passport.session());
 
 app.use("/auth", authRoute);
 app.use("/contract", contractRoute);
+app.use("/payment", paymentRoute);
 
 const PORT = 8080;
 app.listen(PORT, () => {
