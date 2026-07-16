@@ -42,7 +42,7 @@ export function ConnectAccountModal() {
     if (isAgreed) {
       mutation.mutate();
     } else {
-      toast.error("Please agree to the terms and conditions");
+      toast.error("Vui lòng đồng ý với các điều khoản và điều kiện.");
     }
   };
   return (
@@ -53,9 +53,9 @@ export function ConnectAccountModal() {
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Connect Google Account</DialogTitle>
+          <DialogTitle>Kết nối tài khoản Google</DialogTitle>
           <DialogDescription>
-            Please connect your google account to continue
+            Vui lòng kết nối tài khoản Google của bạn để tiếp tục.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -67,7 +67,7 @@ export function ConnectAccountModal() {
             {mutation.isPending ? (
               <Loader2 className="mr-2 size-4 animate-spin" />
             ) : (
-              <>Sign In With Google</>
+              <>Đăng nhập bằng Google</>
             )}
           </Button>
           <div className="flex items-center space-x-2">
@@ -80,7 +80,7 @@ export function ConnectAccountModal() {
               htmlFor="terms"
               className="text-sm text-gray-500 leading-none peerd-disabled:cursor-not-allowed peer-disabled:opacity-50"
             >
-              I agree to terms and conditions
+              Tôi đồng ý với các điều khoản và điều kiện.
             </Label>
           </div>
         </div>

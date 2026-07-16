@@ -3,10 +3,8 @@ import { ReactNode, useState } from "react";
 
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -28,26 +26,27 @@ interface IContractAnalysisResultsProps {
   analysisResults: ContractAnalysis;
   isActive: boolean;
   contractId: string;
+  onUpgrade: () => void;
 }
 
 export default function ContractAnalysisResults({
   analysisResults,
   isActive,
-  contractId,
+  onUpgrade,
 }: IContractAnalysisResultsProps) {
   const [activeTab, setActiveTab] = useState("summary");
 
-  if(!analysisResults) {
-    return <div>No results!</div>
+  if (!analysisResults) {
+    return <div>Chưa có kết quả!</div>;
   }
 
   const getScore = () => {
     const score = analysisResults.overallScore;
     if (score > 70)
-      return { icon: ArrowUp, color: "text-green-500", text: "Good" };
+      return { icon: ArrowUp, color: "text-green-500", text: "Tốt" };
     if (score < 50)
-      return { icon: ArrowDown, color: "text-red-500", text: "Bad" };
-    return { icon: Minus, color: "text-yellow-500", text: "Average" };
+      return { icon: ArrowDown, color: "text-red-500", text: "Xấu" };
+    return { icon: Minus, color: "text-yellow-500", text: "Trung bình" };
   };
 
   const scoreTrend = getScore();
@@ -155,7 +154,9 @@ export default function ContractAnalysisResults({
     return (
       <div className="relative">
         <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-50 flex items-center justify-between">
-          <Button variant="outline">Upgrade to Premium</Button>
+          <Button onClick={onUpgrade} variant="outline">
+            Nâng cấp gói hội viên
+          </Button>
           <div className="opacity-50">{content}</div>
         </div>
       </div>
@@ -170,9 +171,9 @@ export default function ContractAnalysisResults({
       </div>
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Overal Contract Score</CardTitle>
+          <CardTitle>Điểm tổng hợp</CardTitle>
           <CardDescription>
-            Based on risks and opprtunities identified{" "}
+            Dựa trên các rủi ro và cơ hội đã được xác định.{" "}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -189,17 +190,17 @@ export default function ContractAnalysisResults({
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Risk</span>
+                  <span>Rủi ro</span>
                   <span>{100 - analysisResults.overallScore}%</span>
                 </div>
 
                 <div className="flex justify-between text-sm">
-                  <span>Opportunities</span>
+                  <span>Cơ hội</span>
                   <span>{analysisResults.overallScore}%</span>
                 </div>
                 <p className="text-sm text-gray-600 mt-4">
-                  This score represents the overall risk and opportunities
-                  identified in the contract
+                  Điểm số này thể hiện rủi ro và cơ hội tổng thể được xác định
+                  trong hợp đồng
                 </p>
               </div>
             </div>
@@ -216,10 +217,10 @@ export default function ContractAnalysisResults({
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="summary">Summary</TabsTrigger>
-          <TabsTrigger value="risks">Risks</TabsTrigger>
-          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
-          <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="summary">Tóm tắt</TabsTrigger>
+          <TabsTrigger value="risks">Rửi ro</TabsTrigger>
+          <TabsTrigger value="opportunities">Cơ hội</TabsTrigger>
+          <TabsTrigger value="details">Chi tiết</TabsTrigger>
         </TabsList>
         <TabsContent value="summary">
           <Card>
@@ -243,7 +244,7 @@ export default function ContractAnalysisResults({
 
               {!isActive && (
                 <p className="mt-4 text-center text-sm text-gray-500">
-                  Upgrade to Premium to see all risks
+                  Nâng cấp lên gói Premium để xem tất cả các rủi ro.
                 </p>
               )}
             </CardContent>
@@ -263,7 +264,7 @@ export default function ContractAnalysisResults({
               )}
               {!isActive && (
                 <p className="mt-4 text-center text-sm text-gray-500">
-                  Upgrade to Premium to see all opportunities
+                  Nâng cấp lên gói Premium để xem tất cả các tùy chọn.
                 </p>
               )}
             </CardContent>
@@ -274,7 +275,7 @@ export default function ContractAnalysisResults({
             <div className="grid md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Contract Details</CardTitle>
+                  <CardTitle>Chi tiết hợp đồng</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
@@ -288,7 +289,7 @@ export default function ContractAnalysisResults({
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle>Recommendations</CardTitle>
+                  <CardTitle>Các khuyến nghị</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
@@ -306,14 +307,20 @@ export default function ContractAnalysisResults({
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Contract Details</CardTitle>
+                <CardTitle>Chi tiết hợp đồng</CardTitle>
               </CardHeader>
               <CardContent>
                 <p>
-                  Upgrade to Premium to see contract detailed analysis,
-                  including key clauses and recommendations
+                  Nâng cấp lên gói Premium để xem phân tích chi tiết hợp đồng,
+                  bao gồm các điều khoản chính và khuyến nghị
                 </p>
-                <Button className="mt-4">Upgrade to Premium</Button>
+                <Button
+                  onClick={onUpgrade}
+                  variant={"outline"}
+                  className="mt-4"
+                >
+                  Nâng cấp lên gói Premium
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -324,19 +331,17 @@ export default function ContractAnalysisResults({
         {renderPremiumAccordion(
           <>
             <AccordionItem value="contract-details">
-              <AccordionTrigger>Contract Details</AccordionTrigger>
+              <AccordionTrigger>Chi tiết hợp đồng</AccordionTrigger>
               <AccordionContent>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <h3 className="font-semibold mb-2">
-                      Duration and Termination
-                    </h3>
+                    <h3 className="font-semibold mb-2">Thời hạn và kết thúc</h3>
                     <p>{analysisResults.contractDuration}</p>
                     <strong>Termination Conditions</strong>
                     <p>{analysisResults.terminationConditions}</p>
                   </div>
                   <div className="">
-                    <h3 className="font-semibold mb-2">Legal Infomation</h3>
+                    <h3 className="font-semibold mb-2">Thông tin pháp lý</h3>
                     <p>
                       <strong>Legal Compliance</strong>
                       {analysisResults.legalCompliance}
@@ -351,7 +356,7 @@ export default function ContractAnalysisResults({
 
       <Card>
         <CardHeader>
-          <CardTitle>Negotiation Points</CardTitle>
+          <CardTitle>Điểm đàm phán</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="grid md:grid-cols-2 gap-2">

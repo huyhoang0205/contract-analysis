@@ -1,4 +1,5 @@
 "use client";
+
 import { cn } from "@/lib/utils";
 import { FileText, Home, LayoutDashboard, Settings } from "lucide-react";
 import Link from "next/link";
@@ -16,22 +17,22 @@ const SidebarContent = () => {
   const sidebarItems = [
     {
       icon: Home,
-      label: "Home",
+      label: "Trang chủ",
       href: "/",
     },
     {
       icon: LayoutDashboard,
-      label: "Dashboard",
+      label: "Tổng quan",
       href: "/dashboard",
     },
     {
       icon: FileText,
-      label: "Results",
+      label: "Kết quả",
       href: "/dashboard/results",
     },
     {
       icon: Settings,
-      label: "Settings",
+      label: "Cài đặt",
       href: "/dashboard/settings",
     },
   ];

@@ -49,6 +49,9 @@ export default function ContractResults({ contractId }: IContractResultsProps) {
         contractId={contractId}
         analysisResults={analysisResutls}
         isActive={true}
+        onUpgrade={function (): void {
+          throw new Error("Function not implemented.");
+        }}
       />
     );
   }

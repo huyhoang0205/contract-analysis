@@ -1,20 +1,9 @@
 "use client";
-
-import { TrendingUp } from "lucide-react";
 import { Label, Pie, PieChart } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from "@/components/ui/chart";
 
 interface OverallScoreChartProps {
@@ -39,14 +28,14 @@ export default function OverallScoreChart({
 
   const chartConfig = {
     value: {
-      label: "value",
+      label: "giá trị",
     },
     Risks: {
-      label: "Risks",
+      label: "Rủi ro",
       color: "var(--chart-3)",
     },
     Opportunities: {
-      label: "Opportunities",
+      label: "Cơ hội",
       color: "var(--chart-4)",
     },
   };
@@ -72,7 +61,7 @@ export default function OverallScoreChart({
                   return (
                     <text>
                       <tspan>{overallScore}%</tspan>
-                      <tspan>Score</tspan>
+                      <tspan>Điểm đánh giá</tspan>
                     </text>
                   );
                 }

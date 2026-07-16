@@ -46,20 +46,24 @@ export default function AuthCard() {
         <div className="sm:w-3/4 p-4">
           <CardHeader className="space-y-1 px-0 pb-2">
             <CardTitle className="text-2xl font-bold">
-              Authentication Required
+              Yêu cầu xác thực
             </CardTitle>
             <CardDescription>
-              You need to be logged to access this page
+              Bạn cần đăng nhập để truy cập trang này.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-2">
-              <Button className="flex-1" variant="outline" onClick={() => openModals("connectAccountModal")}>
-                Continue with google
+              <Button
+                className="flex-1"
+                variant="outline"
+                onClick={() => openModals("connectAccountModal")}
+              >
+                Tiếp tục với Google
               </Button>
               <Link href="/" className="flex-1">
                 <Button className="w-full " variant="outline">
-                  Back to home
+                  Trở về trang chủ
                 </Button>
               </Link>
             </div>

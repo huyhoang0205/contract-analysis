@@ -73,3 +73,12 @@ export const handleWebhook = async (req: Request, res: Response) => {
 
   res.status(200).json({ received: true });
 };
+
+export const getPremiumStatus = async (req: Request, res: Response) => {
+  const user = req.user as IUser;
+  if (user.isPremium) {
+    res.json({ status: "active" });
+  } else {
+    res.json({ status: "inactive" });
+  }
+};

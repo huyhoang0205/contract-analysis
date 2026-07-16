@@ -61,8 +61,8 @@ export default function UserContract() {
   const columns: ColumnDef<ContractAnalysis>[] = [
     {
       accessorKey: "_id",
-      header: ({ column }) => {
-        return <Button variant="ghost"> Contract ID </Button>;
+      header: () => {
+        return <Button variant="ghost"> ID </Button>;
       },
       cell: ({ row }) => (
         <div className="font-medium">{row.getValue("_id")}</div>
@@ -70,8 +70,8 @@ export default function UserContract() {
     },
     {
       accessorKey: "overallScore",
-      header: ({ column }) => {
-        return <Button variant="ghost"> Overall Score </Button>;
+      header: () => {
+        return <Button variant="ghost"> Điểm tổng hợp </Button>;
       },
       cell: ({ row }) => {
         const score = parseFloat(row.getValue("overallScore"));
@@ -86,14 +86,14 @@ export default function UserContract() {
                   : "secondary"
             }
           >
-            {score.toFixed(2)} Overall Score{" "}
+            {score.toFixed(2)}{" "}
           </Badge>
         );
       },
     },
     {
       accessorKey: "contractType",
-      header: "Contract Type",
+      header: "Loại hợp đồng",
       cell: ({ row }) => {
         const contractType = row.getValue("contractType") as string;
         const colorClass =
@@ -120,29 +120,29 @@ export default function UserContract() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem>
                 <Link href={`/dashboard/contract/${contract._id}`}>
-                  View Detail
+                  Chi tiết
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <span className="text-destructive">Delete contract</span>
+                    <span className="text-destructive">Xóa hợp đồng</span>
                   </DropdownMenuItem>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      Are you absolutely sure?
+                      Bạn hoàn toàn chắc chắn?
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete
-                      your contract from our servers.
+                      Thao tác này không thể hoàn tác. Thao tác này sẽ xóa vĩnh
+                      viễn hợp đồng của bạn khỏi máy chủ của chúng tôi.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction>Continue</AlertDialogAction>
+                    <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
+                    <AlertDialogAction>Tiếp tục</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -179,15 +179,15 @@ export default function UserContract() {
   return (
     <div className="container mx-auto p-6 space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Your Contract</h1>
-        <Button onClick={() => setIsUploadModalOpen(true)}>New Contract</Button>
+        <h1 className="text-3xl font-bold">Hợp đồng của bạn</h1>
+        <Button onClick={() => setIsUploadModalOpen(true)}>New</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total contracts
+              Tổng số hợp đồng
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -197,7 +197,9 @@ export default function UserContract() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Score</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Điểm trung bình
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{averageScore.toFixed(2)}</div>
@@ -207,7 +209,7 @@ export default function UserContract() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              High Risks Contracts
+              Hợp đồng rủi ro cao
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -279,7 +281,7 @@ export default function UserContract() {
           onClick={() => tables.setPageIndex(0)}
           disabled={!tables.getCanPreviousPage()}
         >
-          Previous
+          Trước
         </Button>
         <Button
           variant="outline"
@@ -287,7 +289,7 @@ export default function UserContract() {
           onClick={() => tables.nextPage()}
           disabled={!tables.getCanNextPage()}
         >
-          Next
+          Sau
         </Button>
       </div>
       <UploadModal

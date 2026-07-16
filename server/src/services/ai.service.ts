@@ -1,10 +1,8 @@
 import { redis } from "../config/redis";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
-// import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
 
 export const AI_MODEL = "gemini-2.5-flash";
-// const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_SECRET! });
 
 const client = new OpenAI({
   baseURL: "https://aiapiv2.pekpik.com/v1",
@@ -62,14 +60,6 @@ export const detectContractType = async (
     Văn bản hợp đồng:
     ${contractText.substring(0, 2000)}`;
 
-  // const results = await genAI.models.generateContent({
-  //   model: AI_MODEL,
-  //   contents: prompt,
-  // });
-  // const response = results.text
-  //   ? results.text.trim()
-  //   : "Something with wrong with response of genAI";
-
   const results = await client.responses.create({
     model: "deepseek-chat",
     input: prompt,
@@ -102,64 +92,61 @@ export interface FallbackAnalysis {
 
 export const analyzeContractWithAI = async (
   contractText: string,
+  tier: "free" | "premium",
   contractType: string,
 ) => {
-  let prompt = `
-    Hãy phân tích hợp đồng ${contractType} sau đây và cung cấp:
-    1. Danh sách ít nhất 10 rủi ro tiềm ẩn đối với bên nhận hợp đồng (người lao động), mỗi rủi ro kèm theo giải thích ngắn gọn và mức độ nghiêm trọng (thấp, trung bình, cao).
-    2. Danh sách ít nhất 10 cơ hội hoặc lợi ích tiềm ẩn cho bên nhận hợp đồng, mỗi cơ hội kèm theo giải thích ngắn gọn và mức độ tác động (thấp, trung bình, cao).
-    3. Bản tóm tắt toàn diện về hợp đồng, bao gồm các điều khoản và điều kiện chính.
-    4. Bất kỳ kiến nghị nào nhằm cải thiện hợp đồng dưới góc nhìn của bên nhận hợp đồng.
-    5. Danh sách các điều khoản chính trong hợp đồng.
-    6. Đánh giá về tính tuân thủ pháp lý của hợp đồng.
-    7. Danh sách các điểm tiềm ẩn có thể thương lượng.
-    8. Thời hạn hoặc thời gian của hợp đồng, nếu có.
-    9. Tóm tắt các điều kiện chấm dứt hợp đồng, nếu có.
-    10. Bảng phân rã các điều khoản tài chính hoặc cấu trúc tiền lương/bồi thường, nếu có.
-    11. Bất kỳ chỉ số hiệu suất hoặc KPI nào được đề cập, nếu có.
-    12. Tóm tắt các điều khoản cụ thể liên quan đến loại hợp đồng này (ví dụ: sở hữu trí tuệ đối với hợp đồng lao động, bảo hành đối với hợp đồng mua bán).
-    13. Điểm số tổng thể từ 1 đến 100, với 100 là cao nhất. Điểm số này đại diện cho mức độ thuận lợi tổng thể của hợp đồng dựa trên các rủi ro và cơ hội đã xác định.
-    14. Định dạng phản hồi của bạn dưới dạng một đối tượng JSON với cấu trúc như sau:
-    {
-      "risks": [{"risk": "Risk description", "explanation": "Brief explanation", "severity": "low|medium|high"}],
-      "opportunities": [{"opportunity": "Opportunity description", "explanation": "Brief explanation", "impact": "low|medium|high"}],
-      "summary": "Comprehensive summary of the contract",
-      "recommendations": ["Recommendation 1", "Recommendation 2", ...],
-      "keyClauses": ["Clause 1", "Clause 2", ...],
-      "legalCompliance": "Assessment of legal compliance",
-      "negotiationPoints": ["Point 1", "Point 2", ...],
-      "contractDuration": "Duration of the contract, if applicable",
-      "terminationConditions": "Summary of termination conditions, if applicable",
-      "overallScore": "Overall score from 1 to 100",
-      "financialTerms": {
-        "description": "Overview of financial terms",
-        "details": ["Detail 1", "Detail 2", ...]
-      },
-      "performanceMetrics": ["Metric 1", "Metric 2", ...],
-      "specificClauses": "Summary of clauses specific to this contract type"
-  `;
-
-  prompt += `
-    Important: Provide only the JSON object in your response, without any additional text or formatting. 
-    
-    
-    Contract text:
-    ${contractText}
+  let prompt;
+  if (tier === "premium") {
+    prompt = `
+      Hãy phân tích hợp đồng ${contractType} sau đây và cung cấp:
+      1. Danh sách ít nhất 10 rủi ro tiềm ẩn đối với bên nhận hợp đồng (người lao động), mỗi rủi ro kèm theo giải thích ngắn gọn và mức độ nghiêm trọng (thấp, trung bình, cao).
+      2. Danh sách ít nhất 10 cơ hội hoặc lợi ích tiềm ẩn cho bên nhận hợp đồng, mỗi cơ hội kèm theo giải thích ngắn gọn và mức độ tác động (thấp, trung bình, cao).
+      3. Bản tóm tắt toàn diện về hợp đồng, bao gồm các điều khoản và điều kiện chính.
+      4. Bất kỳ kiến nghị nào nhằm cải thiện hợp đồng dưới góc nhìn của bên nhận hợp đồng.
+      5. Danh sách các điều khoản chính trong hợp đồng.
+      6. Đánh giá về tính tuân thủ pháp lý của hợp đồng.
+      7. Danh sách các điểm tiềm ẩn có thể thương lượng.
+      8. Thời hạn hoặc thời gian của hợp đồng, nếu có.
+      9. Tóm tắt các điều kiện chấm dứt hợp đồng, nếu có.
+      10. Bảng phân rã các điều khoản tài chính hoặc cấu trúc tiền lương/bồi thường, nếu có.
+      11. Bất kỳ chỉ số hiệu suất hoặc KPI nào được đề cập, nếu có.
+      12. Tóm tắt các điều khoản cụ thể liên quan đến loại hợp đồng này (ví dụ: sở hữu trí tuệ đối với hợp đồng lao động, bảo hành đối với hợp đồng mua bán).
+      13. Điểm số tổng thể từ 1 đến 100, với 100 là cao nhất. Điểm số này đại diện cho mức độ thuận lợi tổng thể của hợp đồng dựa trên các rủi ro và cơ hội đã xác định.
+      14. Định dạng phản hồi của bạn dưới dạng một đối tượng JSON với cấu trúc như sau:
+      {
+        "risks": [{"risk": "Risk description", "explanation": "Brief explanation", "severity": "low|medium|high"}],
+        "opportunities": [{"opportunity": "Opportunity description", "explanation": "Brief explanation", "impact": "low|medium|high"}],
+        "summary": "Comprehensive summary of the contract",
+        "recommendations": ["Recommendation 1", "Recommendation 2", ...],
+        "keyClauses": ["Clause 1", "Clause 2", ...],
+        "legalCompliance": "Assessment of legal compliance",
+        "negotiationPoints": ["Point 1", "Point 2", ...],
+        "contractDuration": "Duration of the contract, if applicable",
+        "terminationConditions": "Summary of termination conditions, if applicable",
+        "overallScore": "Overall score from 1 to 100",
+        "financialTerms": {
+          "description": "Overview of financial terms",
+          "details": ["Detail 1", "Detail 2", ...]
+        },
+        "performanceMetrics": ["Metric 1", "Metric 2", ...],
+        "specificClauses": "Summary of clauses specific to this contract type"
     `;
 
-  // const results = await genAI.models.generateContent({
-  //   model: AI_MODEL,
-  //   contents: prompt,
-  // });
+    prompt += `
+      Important: Provide only the JSON object in your response, without any additional text or formatting. 
+      Contract text:
+      ${contractText}
+      `;
+  } else {
+    prompt = `
+    
+    `;
+  }
 
   const results = await client.responses.create({
     model: "deepseek-chat",
-    input: prompt,
+    input: prompt as string,
   });
-
-  // let text = results.text
-  //   ? results.text.trim()
-  //   : "Something with wrong with response of genAI";
 
   let text = results.output_text
     ? results.output_text.trim()

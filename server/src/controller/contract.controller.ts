@@ -79,9 +79,13 @@ export const analyzeContract = async (
 
     const pdfText = await extractTextFromPDF(fileKey);
 
-    let analysis: FallbackAnalysis | any;
+    let analysis: any;
 
-    analysis = await analyzeContractWithAI(pdfText, contractType);
+    if (user.isPremium) {
+      analysis = await analyzeContractWithAI(pdfText, "premium", contractType);
+    } else {
+      analysis = await analyzeContractWithAI(pdfText, "free", contractType);
+    }
 
     if (!analysis.summary || !analysis.risks || !analysis.opportunities) {
       throw new Error("Failed to analyze contract");
@@ -126,7 +130,7 @@ export const getUserContracts = async (req: Request, res: Response) => {
 };
 
 export const getContractByID = async (req: Request, res: Response) => {
-  const { id } = req.params as {id: string};
+  const { id } = req.params as { id: string };
   const user = req.user as IUser;
 
   if (!isValidMongoId(id)) {

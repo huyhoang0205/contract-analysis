@@ -155,11 +155,11 @@ export function UploadModal({
                   <FileText className="mx-auto size-16 text-primary" />
                 </motion.div>
                 <p className="mt-4 text-sm text-gray-600">
-                  Drag &apos;n&apos; drop your contract here, or click to select
-                  files
+                  Kéo và thả hợp đồng của bạn vào đây, hoặc nhấp chuột để chọn
+                  tệp.
                 </p>
                 <p className="bg-yellow-500/30 border border-yellow-500 border-dashed text-yellow-700 p-2 rounded mt-2">
-                  Note: Only PDF files are supported
+                  Lưu ý: Chỉ hỗ trợ định dạng PDF.
                 </p>
               </div>
               {files.length > 0 && (
@@ -183,7 +183,7 @@ export function UploadModal({
               {files.length > 0 && !isProcessing && (
                 <Button className="mt-4 w-full mb-4" onClick={handleFileUpload}>
                   <Sparkles className="mr-2 size-4" />
-                  Analyze Contract With AI
+                  Phân tích hợp đồng bằng AI
                 </Button>
               )}
             </motion.div>
@@ -196,7 +196,7 @@ export function UploadModal({
             <motion.div className="flex flex-col items-center justify-center py-8">
               <Loader2 className="size-16 animate-spin text-primary" />
               <p className="mt-4 text-lg font-semibold ">
-                Detecting contract type...
+                Đang phân tích loại hợp đồng...
               </p>
             </motion.div>
           </AnimatePresence>
@@ -208,21 +208,21 @@ export function UploadModal({
             <motion.div>
               <div className="flex flex-col space-y-4 mb-4">
                 <p>
-                  We have detected the following contract type:
+                  Chúng tôi đã phân tích được hợp đồng thuộc loại :
                   <span className="font-semibold"> {detectedType}</span>
                 </p>
-                <p>Would you like to analyze this contract with our AI?</p>
+                <p>Bạn có muốn phân tích hợp đồng này bằng AI không?</p>
               </div>
               <div className="flex space-x-4">
                 <Button onClick={handleAnalyzeContract}>
-                  Yes, I want to analyze it
+                  Tôi muốn phân tích nó.
                 </Button>
                 <Button
                   onClick={() => setStep("upload")}
                   variant={"outline"}
                   className="flex-1"
                 >
-                  No, Try another file
+                  Không, thử lại với tệp khác.
                 </Button>
               </div>
             </motion.div>
@@ -257,7 +257,7 @@ export function UploadModal({
                 transition={{ delay: 0.5 }}
                 className="mt-6 text-lg font-semibold text-gray-700"
               >
-                AI is analyzing your contract...
+                AI đang phân tích hợp đồng của bạn...
               </motion.p>
               <motion.p
                 initial={{ opacity: 0 }}
@@ -265,7 +265,7 @@ export function UploadModal({
                 transition={{ delay: 1 }}
                 className="mt-2 text-sm text-gray-700"
               >
-                This may take some time.
+                Việc này có thể mất một chút thời gian.
               </motion.p>
               <motion.div
                 className="w-64 h-2 bg-gray-200 rounded-full mt-6 overflow-hidden"
@@ -289,18 +289,19 @@ export function UploadModal({
           <AnimatePresence>
             <motion.div>
               <Alert className="mt-4">
-                <AlertTitle>Analysis completed</AlertTitle>
+                <AlertTitle>Phân tích đã hoàn tất</AlertTitle>
                 <AlertDescription>
-                  Your contract has been analyzed. you can now view the results
+                  Hợp đồng của bạn đã được phân tích. Giờ bạn có thể xem kết
+                  quả.
                 </AlertDescription>
               </Alert>
 
               <motion.div className="mt-6 flex flex-col space-y-3 relative">
                 <Button onClick={() => router.push(`/dashboard/results`)}>
-                  View results
+                  Xem kết quả
                 </Button>
                 <Button variant={"outline"} onClick={handleClose}>
-                  Close
+                  Đóng
                 </Button>
               </motion.div>
             </motion.div>
@@ -313,7 +314,7 @@ export function UploadModal({
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent>
-        <DialogTitle>Upload file</DialogTitle>
+        <DialogTitle>Upload</DialogTitle>
         <DialogDescription></DialogDescription>
         {renderContent()}
       </DialogContent>
