@@ -40,6 +40,19 @@ export default function ContractAnalysisResults({
     return <div>Chưa có kết quả!</div>;
   }
 
+  const cvname = (name: string | undefined) => {
+    switch (name) {
+      case "low":
+        return "thấp";
+      case "high":
+        return "cao";
+      case "medium":
+        return "trung bình";
+      default:
+        return "";
+    }
+  };
+
   const getScore = () => {
     const score = analysisResults.overallScore;
     if (score > 70)
@@ -115,7 +128,7 @@ export default function ContractAnalysisResults({
                       : getImpactColor(item.impact!)
                   }
                 >
-                  {(item.severity || item.impact)?.toUpperCase()}
+                  {(cvname(item.severity) || cvname(item.impact))?.toUpperCase()}
                 </Badge>
               )}
             </div>

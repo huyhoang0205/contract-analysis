@@ -14,7 +14,7 @@ import { Button } from "./ui/button";
 export function PricingSection() {
   const handleUpgrade = async () => {
     try {
-      const response = await api.get("/payment/create-checkout-session");
+      const response = await api.get("/payment/create-checkout-session/vnpay");
       if (response.data.url) {
         window.location.href = response.data.url;
       }

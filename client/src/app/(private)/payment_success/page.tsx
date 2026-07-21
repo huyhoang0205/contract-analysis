@@ -11,10 +11,17 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { UploadModal } from "@/components/modals/upload-modal";
+import { redirect, useSearchParams } from "next/navigation";
 
 export default function PaymentSuccessPage() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const searchParams = useSearchParams();
 
+  const vnp_ResponseCode = searchParams.get("vnp_ResponseCode");
+
+  if (vnp_ResponseCode !== "00") {
+    redirect("/payment_cancel")
+  }
   return (
     <>
       <div className="min-h-screen flex items-center justify-center p-4 ">

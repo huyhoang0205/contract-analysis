@@ -258,6 +258,9 @@ importers:
       stripe:
         specifier: ^22.3.1
         version: 22.3.1(@types/node@25.9.2)
+      vnpay:
+        specifier: ^2.5.0
+        version: 2.5.0
     devDependencies:
       '@types/cors':
         specifier: ^2.8.19
@@ -704,6 +707,9 @@ packages:
   cors@2.8.6:
     resolution: {integrity: sha512-tJtZBBHA6vjIAaF6EnIaq6laBBP9aq/Y3ouVJjEfoHbRBcHBAHYcMh/w8LDrk2PvIMMq8gmopa5D4V8RmbrxGw==}
     engines: {node: '>= 0.10'}
+
+  dayjs@1.11.21:
+    resolution: {integrity: sha512-98IT+HOahAisibz/yjKbzuOBwYcjJ7BCLPzARyHiyEBmRz4fatF+KPJszEHXsGYjUG234aH/cOjW1wwTbKUZlA==}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -1266,6 +1272,9 @@ packages:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
 
+  vnpay@2.5.0:
+    resolution: {integrity: sha512-kyUYxG0pyEnRu/ha0gSVqkPCajmql523W2PQzgCkH4ct4XdEuzdiQnssi/k9XMcv+TvoPzuweEJG+4hWNU2DAQ==}
+
   webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
     engines: {node: '>=12'}
@@ -1627,6 +1636,8 @@ snapshots:
     dependencies:
       object-assign: 4.1.1
       vary: 1.1.2
+
+  dayjs@1.11.21: {}
 
   debug@2.6.9:
     dependencies:
@@ -2188,6 +2199,10 @@ snapshots:
   utils-merge@1.0.1: {}
 
   vary@1.1.2: {}
+
+  vnpay@2.5.0:
+    dependencies:
+      dayjs: 1.11.21
 
   webidl-conversions@7.0.0: {}
 

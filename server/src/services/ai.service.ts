@@ -99,47 +99,101 @@ export const analyzeContractWithAI = async (
   if (tier === "premium") {
     prompt = `
       Hãy phân tích hợp đồng ${contractType} sau đây và cung cấp:
-      1. Danh sách ít nhất 10 rủi ro tiềm ẩn đối với bên nhận hợp đồng (người lao động), mỗi rủi ro kèm theo giải thích ngắn gọn và mức độ nghiêm trọng (thấp, trung bình, cao).
-      2. Danh sách ít nhất 10 cơ hội hoặc lợi ích tiềm ẩn cho bên nhận hợp đồng, mỗi cơ hội kèm theo giải thích ngắn gọn và mức độ tác động (thấp, trung bình, cao).
+      1. Danh sách ít nhất 10 rủi ro tiềm ẩn đối với bên nhận hợp đồng (người lao động/bên thụ hưởng), mỗi rủi ro kèm theo giải thích ngắn gọn và mức độ nghiêm trọng  (low, medium, high).
+      2. Danh sách ít nhất 10 cơ hội hoặc lợi ích tiềm ẩn cho bên nhận hợp đồng, mỗi cơ hội kèm theo giải thích ngắn gọn và mức độ tác động  (low, medium, high).
       3. Bản tóm tắt toàn diện về hợp đồng, bao gồm các điều khoản và điều kiện chính.
       4. Bất kỳ kiến nghị nào nhằm cải thiện hợp đồng dưới góc nhìn của bên nhận hợp đồng.
       5. Danh sách các điều khoản chính trong hợp đồng.
       6. Đánh giá về tính tuân thủ pháp lý của hợp đồng.
       7. Danh sách các điểm tiềm ẩn có thể thương lượng.
-      8. Thời hạn hoặc thời gian của hợp đồng, nếu có.
+      8. Thời hạn hoặc thời gian hiệu lực của hợp đồng, nếu có.
       9. Tóm tắt các điều kiện chấm dứt hợp đồng, nếu có.
       10. Bảng phân rã các điều khoản tài chính hoặc cấu trúc tiền lương/bồi thường, nếu có.
       11. Bất kỳ chỉ số hiệu suất hoặc KPI nào được đề cập, nếu có.
       12. Tóm tắt các điều khoản cụ thể liên quan đến loại hợp đồng này (ví dụ: sở hữu trí tuệ đối với hợp đồng lao động, bảo hành đối với hợp đồng mua bán).
       13. Điểm số tổng thể từ 1 đến 100, với 100 là cao nhất. Điểm số này đại diện cho mức độ thuận lợi tổng thể của hợp đồng dựa trên các rủi ro và cơ hội đã xác định.
-      14. Định dạng phản hồi của bạn dưới dạng một đối tượng JSON với cấu trúc như sau:
+      
+      Yêu cầu phản hồi hoàn toàn bằng tiếng Việt dưới dạng một đối tượng JSON chuẩn theo cấu trúc sau:
       {
-        "risks": [{"risk": "Risk description", "explanation": "Brief explanation", "severity": "low|medium|high"}],
-        "opportunities": [{"opportunity": "Opportunity description", "explanation": "Brief explanation", "impact": "low|medium|high"}],
-        "summary": "Comprehensive summary of the contract",
-        "recommendations": ["Recommendation 1", "Recommendation 2", ...],
-        "keyClauses": ["Clause 1", "Clause 2", ...],
-        "legalCompliance": "Assessment of legal compliance",
-        "negotiationPoints": ["Point 1", "Point 2", ...],
-        "contractDuration": "Duration of the contract, if applicable",
-        "terminationConditions": "Summary of termination conditions, if applicable",
-        "overallScore": "Overall score from 1 to 100",
+        "risks": [
+          {
+            "risk": "Mô tả rủi ro",
+            "explanation": "Giải thích ngắn gọn",
+            "severity": : "low|medium|high"
+          }
+        ],
+        "opportunities": [
+          {
+            "opportunity": "Mô tả cơ hội / lợi ích",
+            "explanation": "Giải thích ngắn gọn",
+            "impact": "low|medium|high"
+          }
+        ],
+        "summary": "Tóm tắt toàn diện về hợp đồng",
+        "recommendations": [
+          "Khuyến nghị 1",
+          "Khuyến nghị 2"
+        ],
+        "keyClauses": [
+          "Điều khoản chính 1",
+          "Điều khoản chính 2"
+        ],
+        "legalCompliance": "Đánh giá tính tuân thủ pháp lý",
+        "negotiationPoints": [
+          "Điểm có thể thương lượng 1",
+          "Điểm có thể thương lượng 2"
+        ],
+        "contractDuration": "Thời hạn/Thời gian của hợp đồng",
+        "terminationConditions": "Tóm tắt các điều kiện chấm dứt hợp đồng",
+        "overallScore": "Điểm số từ 1 đến 100 (chỉ xuất số)",
         "financialTerms": {
-          "description": "Overview of financial terms",
-          "details": ["Detail 1", "Detail 2", ...]
+          "description": "Tổng quan về các điều khoản tài chính/lương thưởng",
+          "details": [
+            "Chi tiết 1",
+            "Chi tiết 2"
+          ]
         },
-        "performanceMetrics": ["Metric 1", "Metric 2", ...],
-        "specificClauses": "Summary of clauses specific to this contract type"
+        "performanceMetrics": [
+          "Chỉ số KPI/Hiệu suất 1",
+          "Chỉ số KPI/Hiệu suất 2"
+        ],
+        "specificClauses": "Tóm tắt các điều khoản đặc thù của loại hợp đồng này"
+      }
     `;
 
     prompt += `
-      Important: Provide only the JSON object in your response, without any additional text or formatting. 
-      Contract text:
+      Quan trọng: Chỉ cung cấp đối tượng JSON trong phản hồi của bạn, không kèm theo bất kỳ văn bản hoặc định dạng bổ sung nào.
+      Văn bản hợp đồng:
       ${contractText}
       `;
   } else {
     prompt = `
-    
+    Phân tích hợp đồng ${contractType} dưới đây và cung cấp:
+    1. Danh sách ít nhất 5 rủi ro tiềm ẩn đối với bên nhận hợp đồng, mỗi rủi ro kèm theo giải thích ngắn gọn và mức độ nghiêm trọng l (low, medium, high).
+    2. Danh sách ít nhất 5 cơ hội hoặc lợi ích tiềm ẩn đối với bên nhận hợp đồng, mỗi cơ hội kèm theo giải thích ngắn gọn và mức độ tác động l (low, medium, high).
+    3. Tóm tắt ngắn gọn nội dung hợp đồng.
+    4. Điểm số tổng quan từ 1 đến 100 (với 100 là tối ưu nhất), thể hiện độ thuận lợi của hợp đồng dựa trên các rủi ro và cơ hội đã chỉ ra.
+
+    Trả về kết quả hoàn toàn bằng tiếng Việt dưới dạng định dạng JSON theo mẫu sau:
+
+    {
+      "risks": [
+        {
+          "risk": "Mô tả rủi ro",
+          "explanation": "Giải thích ngắn gọn",
+          "severity": "low|medium|high"
+        }
+      ],
+      "opportunities": [
+        {
+          "opportunity": "Mô tả cơ hội / lợi ích",
+          "explanation": "Giải thích ngắn gọn",
+          "impact": "low|medium|high"
+        }
+      ],
+      "summary": "Tóm tắt ngắn gọn hợp đồng",
+      "overallScore": "Điểm từ 1 đến 100"
+    }
     `;
   }
 

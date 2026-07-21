@@ -34,7 +34,8 @@
     "passport-local": "^1.0.0",
     "pdfjs-dist": "^6.0.227",
     "resend": "^6.17.2",
-    "stripe": "^22.3.1"
+    "stripe": "^22.3.1",
+    "vnpay": "^2.5.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
