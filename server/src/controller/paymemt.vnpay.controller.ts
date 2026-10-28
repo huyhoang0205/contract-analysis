@@ -39,7 +39,6 @@ export const createUrlCheckout = async (req: Request, res: Response) => {
 
 export const verifyIPN = async (req: Request, res: Response) => {
   try {
-    console.log(req.query);
     const verify: VerifyReturnUrl = await vnpay.verifyIpnCall(req.query as any);
     if (!verify) {
       return res.json(IpnFailChecksum);

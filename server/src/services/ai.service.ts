@@ -65,8 +65,6 @@ export const detectContractType = async (
     input: prompt,
   });
 
-  console.log(results);
-
   const response = results
     ? results.output_text.trim()
     : "Something with wrong with response of genAI";
@@ -206,7 +204,6 @@ export const analyzeContractWithAI = async (
     ? results.output_text.trim()
     : "Something with wrong with response of genAI";
 
-  console.log("analyze contract with ai:::", text);
   // remove any markdown formatting
   text = text.replace(/```json\n?|\n?```/g, "").trim();
 

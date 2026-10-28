@@ -101,11 +101,8 @@ export const analyzeContract = async (
       aiModel: AI_MODEL,
     });
 
-    console.log("savedAnalysis:::", savedAnalysis);
-
     res.json(savedAnalysis);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: "Failed to analyze contract" });
   }
 };

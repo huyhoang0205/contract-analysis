@@ -25,12 +25,10 @@ export default function ContractResults({ contractId }: IContractResultsProps) {
       try {
         const response = await api.get(`/contract/contract/${id}`);
         if (!ignore) {
-          console.log(response.data);
           setAnalysisResults(response.data);
           setError(false);
         }
-      } catch (error) {
-        console.log(error);
+      } catch {
         setError(true);
       } finally {
         setLoading(false);
@@ -61,7 +59,6 @@ export default function ContractResults({ contractId }: IContractResultsProps) {
   }
 
   if (error) {
-    console.log("error", error);
     return notFound();
   }
 }
