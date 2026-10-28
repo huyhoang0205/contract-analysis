@@ -33,9 +33,7 @@ export default function Setting() {
     setLoading(true);
     if (!isActive) {
       try {
-        const response = await api.get(
-          "/payment/create-checkout-session/vnpay",
-        );
+        const response = await api.get("payment/create-checkout-session");
         if (response.data.url) {
           window.location.href = response.data.url;
         }

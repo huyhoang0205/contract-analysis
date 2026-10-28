@@ -25,7 +25,7 @@ export default function ContractResultsPage() {
     setLoading(true);
     if (!isActive) {
       try {
-        const response = await api.get("/payment/create-checkout-session/vnpay");
+        const response = await api.get("payment/create-checkout-session");
         if (response.data.url) {
           window.location.href = response.data.url;
         }
@@ -40,7 +40,12 @@ export default function ContractResultsPage() {
   };
 
   if (!analysisResults) {
-    return <EmptyState title="Chưa có phân tích!" description="Vui lòng tải lên hợp đồng để phân tích" />;
+    return (
+      <EmptyState
+        title="Chưa có phân tích!"
+        description="Vui lòng tải lên hợp đồng để phân tích"
+      />
+    );
   }
 
   return (
