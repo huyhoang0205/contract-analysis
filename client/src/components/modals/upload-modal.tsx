@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 interface IUploadModalProps {
   isOpen: boolean;
@@ -46,7 +47,7 @@ export function UploadModal({
       formData.append("contract", file);
 
       try {
-          const response = await api.post<{ detectedType: string }>(
+        const response = await api.post<{ detectedType: string }>(
           "/contract/detect-type",
           formData,
           {
@@ -56,9 +57,8 @@ export function UploadModal({
           },
         );
         return response.data;
-      }catch(err) {
-        console.error("🔴 Lỗi bị bắt trực tiếp trong mutationFn:", err);
-        throw err; // Ném tiếp để React Query onError bắt được
+      } catch (err) {
+        throw err;
       }
     },
 
@@ -66,10 +66,17 @@ export function UploadModal({
       setDetectedType(data.detectedType);
       setStep("confirm");
     },
-    onError: (error) => {
-      console.log(error);
-      setError("Không xác định được loại hợp đồng");
-      toast.error("Không xác định được loại hợp đồng. Vui lòng thử lại sau");
+    onError: (error: AxiosError) => {
+      if (error.response?.status === 429) {
+        const data = error.response.data as { message?: string };
+        const message =
+          data.message ||
+          "Bạn đã thao tác quá nhanh. Vui lòng thử lại sau ít phút!";
+        toast.error(message);
+      } else {
+        setError("Không xác định được loại hợp đồng");
+        toast.error("Không xác định được loại hợp đồng. Vui lòng thử lại sau");
+      }
       setStep("done");
     },
   });
@@ -86,24 +93,39 @@ export function UploadModal({
       formData.append("contract", file);
       formData.append("contractType", contractType);
 
-      const response = await api.post("/contract/analyze", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      try {
+        const response = await api.post("/contract/analyze", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
-      console.log(response.data);
-      return response.data;
+        console.log(response.data);
+        return response.data;
+      } catch (error) {
+        throw error;
+      }
     },
     onSuccess: (data) => {
       setAnalysisResults(data);
       setStep("done");
       onUploadComplete();
     },
-    onError: (error) => {
-      console.log(error);
-      setError("Có lỗi xảy ra nên không thể phân tích hợp đồng. Vui lòng thử lại sau");
-      toast.error("Có lỗi xảy ra nên không thể phân tích hợp đồng. Vui lòng thử lại sau");
+    onError: (error: AxiosError) => {
+      if (error.response?.status === 429) {
+        const data = error.response.data as { message?: string };
+        const message =
+          data.message ||
+          "Bạn đã thao tác quá nhanh. Vui lòng thử lại sau ít phút!";
+        toast.error(message);
+      } else {
+        setError(
+          "Có lỗi xảy ra nên không thể phân tích hợp đồng. Vui lòng thử lại sau",
+        );
+        toast.error(
+          "Có lỗi xảy ra nên không thể phân tích hợp đồng. Vui lòng thử lại sau",
+        );
+      }
       setStep("done");
     },
   });
@@ -302,37 +324,39 @@ export function UploadModal({
           <AnimatePresence>
             {error ? (
               <motion.div>
-              <Alert className="mt-4">
-                <AlertTitle>Có lỗi xảy ra trong quá trình phân tích</AlertTitle>
-                <AlertDescription>
-                  Vui lòng thử lại sau
-                </AlertDescription>
-              </Alert>
+                <Alert className="mt-4">
+                  <AlertTitle>
+                    Có lỗi xảy ra trong quá trình phân tích
+                  </AlertTitle>
+                  <AlertDescription>Vui lòng thử lại sau</AlertDescription>
+                </Alert>
 
-              <motion.div className="mt-6 flex flex-col space-y-3 relative">
-                <Button variant={"outline"} onClick={handleClose}>
-                  Đóng
-                </Button>
+                <motion.div className="mt-6 flex flex-col space-y-3 relative">
+                  <Button variant={"outline"} onClick={handleClose}>
+                    Đóng
+                  </Button>
+                </motion.div>
               </motion.div>
-            </motion.div>
-            ) : (<motion.div>
-              <Alert className="mt-4">
-                <AlertTitle>Phân tích đã hoàn tất</AlertTitle>
-                <AlertDescription>
-                  Hợp đồng của bạn đã được phân tích. Giờ bạn có thể xem kết
-                  quả.
-                </AlertDescription>
-              </Alert>
+            ) : (
+              <motion.div>
+                <Alert className="mt-4">
+                  <AlertTitle>Phân tích đã hoàn tất</AlertTitle>
+                  <AlertDescription>
+                    Hợp đồng của bạn đã được phân tích. Giờ bạn có thể xem kết
+                    quả.
+                  </AlertDescription>
+                </Alert>
 
-              <motion.div className="mt-6 flex flex-col space-y-3 relative">
-                <Button onClick={() => router.push(`/dashboard/results`)}>
-                  Xem kết quả
-                </Button>
-                <Button variant={"outline"} onClick={handleClose}>
-                  Đóng
-                </Button>
+                <motion.div className="mt-6 flex flex-col space-y-3 relative">
+                  <Button onClick={() => router.push(`/dashboard/results`)}>
+                    Xem kết quả
+                  </Button>
+                  <Button variant={"outline"} onClick={handleClose}>
+                    Đóng
+                  </Button>
+                </motion.div>
               </motion.div>
-            </motion.div>) }
+            )}
           </AnimatePresence>
         );
       }
