@@ -2,10 +2,10 @@ import { redis } from "../config/redis";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import OpenAI from "openai";
 
-export const AI_MODEL = "gemini-2.5-flash";
+export const AI_MODEL = "deepseek-v4.1-flash";
 
 const client = new OpenAI({
-  baseURL: "https://aiapiv2.pekpik.com/v1",
+  baseURL: process.env.OPEN_AI_URL!,
   apiKey: process.env.OPEN_AI_SECRET!,
 });
 
@@ -61,7 +61,7 @@ export const detectContractType = async (
     ${contractText.substring(0, 2000)}`;
 
   const results = await client.responses.create({
-    model: "deepseek-chat",
+    model: AI_MODEL,
     input: prompt,
   });
 
@@ -198,7 +198,7 @@ export const analyzeContractWithAI = async (
   }
 
   const results = await client.responses.create({
-    model: "deepseek-chat",
+    model: AI_MODEL,
     input: prompt as string,
   });
 

@@ -10,16 +10,31 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Button } from "./ui/button";
+import { useSubcription } from "@/hooks/useSubcription";
+import { toast } from "sonner";
 
 export function PricingSection() {
+  const { subcriptionStatus, setLoading } = useSubcription();
+  if (!subcriptionStatus) {
+    return null;
+  }
+  const isActive = subcriptionStatus.status === "active";
+
   const handleUpgrade = async () => {
-    try {
-      const response = await api.get("payment/create-checkout-session");
-      if (response.data.url) {
-        window.location.href = response.data.url;
+    setLoading(true);
+    if (!isActive) {
+      try {
+        const response = await api.get("payment/create-checkout-session");
+        if (response.data.url) {
+          window.location.href = response.data.url;
+        }
+      } catch {
+        toast.error("Vui lòng thử lại hoặc đăng nhập vào tài khoản của bạn.");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.log(error);
+    } else {
+      toast.error("Bạn đã đăng ký gói thành viên");
     }
   };
 

@@ -43,7 +43,7 @@ export default function Setting() {
         setLoading(false);
       }
     } else {
-      toast.error("Bạn đã đã đăng ký gói thành viên");
+      toast.error("Bạn đã đăng ký gói thành viên");
     }
   };
 
