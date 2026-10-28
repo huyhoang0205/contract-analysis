@@ -18,6 +18,7 @@ import paymentRoute from "./routes/payment";
 import { handleWebhook } from "./controller/payment.controller";
 
 const app = express();
+app.set("trust proxy", 1);
 
 // db
 mongoose
