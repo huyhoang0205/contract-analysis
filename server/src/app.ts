@@ -26,6 +26,10 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.log("Error connecting to MongoDB", err));
 
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
